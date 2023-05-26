@@ -1,11 +1,11 @@
 //import liraries
-import React, { Component } from 'react';
+import React, { Component, useEffect } from 'react';
 import { TouchableOpacity } from 'react-native';
 import { View, Text, StyleSheet, Image } from 'react-native';
-import { main_color, main_color_transparent } from '../assets/styles';
+import styles, { main_color, main_color_transparent } from '../assets/styles';
 // create a component
 const FotoItem = (props: any) => {
-
+   
     return (
         <TouchableOpacity style={{
             width: props.width,
@@ -22,11 +22,30 @@ const FotoItem = (props: any) => {
                 style={{
                     width: props.width,
                     height: props.height,
-
-
                 }}
                 source={{ uri: props.uri }}
             />
+            <View style={{
+                    position: "absolute",
+                    width: props.width,
+                    height: props.height,
+                    display:"flex",
+    
+                    flexDirection: "column",
+                    justifyContent: 'flex-end',
+                    alignItems: 'flex-end'
+
+                }}>
+                    <Text
+                    style={{
+                    
+                        textAlign:"right",
+                        color: "white",
+                  
+
+                    }}>{props.e.id}</Text>
+                </View>
+         
             {props.isSelected &&
                 <View style={{
                     position: "absolute",
@@ -46,9 +65,10 @@ const FotoItem = (props: any) => {
                         color: main_color
 
                     }}>+</Text>
+                    
                 </View>
             }
-
+                 
 
         </TouchableOpacity>
 

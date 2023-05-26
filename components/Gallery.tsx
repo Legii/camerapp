@@ -1,4 +1,4 @@
-import { View, Text } from 'react-native'
+import { View, Text, ActivityIndicator } from 'react-native'
 import React, { useEffect, useState } from 'react'
 import * as MediaLibrary from "expo-media-library"
 import styles from '../assets/styles'
@@ -15,7 +15,7 @@ const Gallery = (props: any) => {
     const [imagedata, setImageData] = useState<any[]>([]);
     const [layout, setLayout] = useState("grid")
     const [selected, setSelected] = useState<any[]>([]);
-
+    const [error,setError] = useState(false)
 
 
     const selectHandler = (id: any) => {
@@ -30,6 +30,7 @@ const Gallery = (props: any) => {
         // selected.push(id);
     }
     const getImages = async () => {
+        try {
         const album = await MediaLibrary.getAlbumAsync("DCIM")
         let photos = await MediaLibrary.getAssetsAsync({
             album: album,
@@ -38,6 +39,10 @@ const Gallery = (props: any) => {
         })
 
         setImageData(photos.assets);
+    }
+    catch{
+        setError(true)
+    }
     }
 
     const refresh = () => {
@@ -76,50 +81,53 @@ const Gallery = (props: any) => {
 
         start()
     }, [])
-    if (imagedata.length > 0)
-        return (
-            <View style={[styles.container, { backgroundColor: "#222233" }]}>
+    if(!error)
+        if (imagedata.length > 0)
+            return (
+                <View style={[styles.container, { backgroundColor: "#222233" }]}>
 
-                {permissions
-                    ? <View>
-                        <View style={{ flex: 1, flexDirection: "row", justifyContent: "space-around", alignItems: 'center' }}>
-                            <TextButton text="LAYOUT" onPress={() => layout == "grid" ? setLayout("list") : setLayout("grid")} />
-                            <TextButton text="CAMERA" onPress={() => props.navigation.navigate("cameraScreen")} />
-                            <TextButton text="DELETE" onPress={async () => {
+                    {permissions
+                        ? <View>
+                            <View style={{ flex: 1, flexDirection: "row", justifyContent: "space-around", alignItems: 'center' }}>
+                                <TextButton text="LAYOUT" onPress={() => layout == "grid" ? setLayout("list") : setLayout("grid")} />
+                                <TextButton text="CAMERA" onPress={() => props.navigation.navigate("cameraScreen")} />
+                                <TextButton text="DELETE" onPress={async () => {
 
-                                if (await MediaLibrary.deleteAssetsAsync(selected))
-                                    setSelected([])
-                                await getImages()
+                                    if (await MediaLibrary.deleteAssetsAsync(selected))
+                                        setSelected([])
+                                    await getImages()
 
-                            }
-                            } />
+                                }
+                                } />
 
-                        </View>
-                        <View style={{ flex: 6 }}>
-                            <View>
-                                <FlatList nav={props.navigation} selected={selected} selectHandler={selectHandler} size={getSize()} layout={layout} images={imagedata}></FlatList>
                             </View>
+                            <View style={{ flex: 6 }}>
+                                <View>
+                                    <FlatList nav={props.navigation} selected={selected} selectHandler={selectHandler} size={getSize()} layout={layout} images={imagedata}></FlatList>
+                                </View>
 
+                            </View>
                         </View>
-                    </View>
-                    : <View style={styles.container}>
-                        <Text style={styles.text}>No Permissions</Text>
-                    </View>
-                }
-                {selected.length > 0 &&
-                    <View style={{ position: "absolute", "bottom": 0, width: "100%", backgroundColor: main_color_transparent }}>
-                        <Text style={styles.text}>selected: {selected.length}</Text>
-                    </View>
-                }
-            </View>
+                        : <View style={styles.container}>
+                            <Text style={styles.text}>No Permissions</Text>
+                        </View>
+                    }
+                    {selected.length > 0 &&
+                        <View style={{ position: "absolute", "bottom": 0, width: "100%", backgroundColor: main_color_transparent }}>
+                            <Text style={styles.text}>selected: {selected.length}</Text>
+                        </View>
+                    }
+                </View>
 
 
 
 
-        )
-    else return <View style={[styles.container, styles.mainColor]}>
-        <Text style={[styles.text, styles.title]}>Loading...</Text>
-    </View>
+            )
+        else return <View style={[styles.container, styles.mainColor]}>
+            <Text style={[styles.text, styles.title]}>Loading...</Text>
+            <ActivityIndicator size="large" color="white"/>
+        </View>
+        else return <Text>Error</Text>
 }
 
 export default Gallery
